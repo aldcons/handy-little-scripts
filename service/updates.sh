@@ -14,7 +14,7 @@ remoteYaml="$startYaml"
 #functions 
 . functions.sh
 
-for project in "${project{@}}";
+for project in "${projects[@]}";
     do 
         #Run version script in each project and get the returned yaml
 	projectID=(`echo $project | awk -F":" '{print $2}'`)
