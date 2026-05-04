@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#Checks memory size in mb and compares it to supplied max size. If greater than supplied size will shutdown with linux cammands
+#Checks memory size in mb and compares it to supplied max size. If greater than supplied size will shutdown with linux commands
 #
 #Usage
 #sudo procSize.sh 1600
@@ -22,20 +22,20 @@ maxMem=$1
 logger -s -t $(basename $0) "Process size checker running now."
 
 #delete and adjust procName as appropriate
-proc=`ps aux --sort -rss | erep [p]rocName[1-6]\|[procName_[1-6] | awk '{orint $2}'`
+proc=$(ps aux --sort -rss | grep -E "procName[1-6]|procName_[1-6]" | grep -v grep | awk '{print $2}')
 
 for i in $proc
     do
-        memSize=`echo "$(grep -i vmsize /proc/$i/status | awk '{print $2}') / 1024" | bc`
+        memSize=$(echo "$(grep -i vmsize /proc/$i/status | awk '{print $2}') / 1024" | bc)
         echo $memSize
         if [ $memSize -gt $maxMem ]
         then
-            logger -s -t (basename $0) "$memSize memory usage for proc $i is a bit high ,stopping process" >&2
+            logger -s -t $(basename $0) "$memSize memory usage for proc $i is a bit high ,stopping process" >&2
                 #for nasty process add a -9.
                 kill $i
-            while [[ ( -d /proc/$i ) &&  -z `grep zombie /proc/$i/status` ) ]]; do sleep 1; done
+            while [[ -d /proc/$i ]] && ! grep -q "zombie" /proc/$i/status 2>/dev/null; do sleep 1; done
         else
-            logger -s -t (basename $0) "proc $i running within accpetable limits."
+            logger -s -t $(basename $0) "proc $i running within acceptable limits."
         fi
     done  
 
